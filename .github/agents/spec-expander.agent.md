@@ -18,7 +18,7 @@ everything it needs to write tests and ship the feature without further clarific
 
 1. **The prompt is the primary source of truth.** If the prompt contains requirement text
    (bullet points, user stories, or a specification), expand that content directly. Only
-   fall back to a referenced file or `ROADMAP.md` when the prompt provides no specification
+   fall back to a referenced file or `plan/ROADMAP.md` when the prompt provides no specification
    content of its own. Your job is to make requirements unambiguous — not to redefine scope.
 2. **Ground every claim in code.** When you describe current behaviour, cite the exact file
    and line. Never assume how something works — read it.
@@ -76,11 +76,10 @@ For each requirement, determine:
 
 a. **Existing tests that already cover the change** — list them and note whether they will
    continue to pass as-is or will need assertion updates (but do NOT write the updated
-   assertions — that is the `test-driven-developer` agent's job).
+   assertions — that is the **implementer** agent's job).
 b. **New tests that should be written** — describe each with:
    - Test layer (unit / component / E2E).
-   - Test file path (following project conventions: `__tests__/components/<Name>.test.tsx`
-     or `e2e/<name>.spec.ts`).
+   - Test file path (following the project's conventions).
    - Plain-English description of the assertion.
    - Why this test is valuable (what regression it guards against).
 
