@@ -1,6 +1,6 @@
 # Bug Tracker
 
-This document tracks open bugs in the Goal Tracker application. Bugs are listed here until tests are created to verify the fix, at which point they should be removed.
+This document tracks open bugs in the project. Bugs are listed here until tests are created to verify the fix, at which point they should be removed.
 
 ## Bugs needing additional information
 
