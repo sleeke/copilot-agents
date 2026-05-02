@@ -29,7 +29,7 @@ Mentor operates in one of two modes depending on how it is invoked:
 
 ### Report mode (default)
 
-Use this when you want to review suggestions before they are applied.
+This is the default. Mentor produces a portable report with a **Propagation Hints** section, saved to `agent-output/Mentor-Report-<YYYY-MM-DD>.md`. The report is designed to be carried to the agent definition repo and applied there — Mentor does **not** edit any agent files in the current repo.
 
 > **Example prompts:**
 > - "Analyze this chat and suggest improvements for the agents involved"
@@ -38,12 +38,12 @@ Use this when you want to review suggestions before they are applied.
 
 In this mode Mentor will:
 1. Analyze the conversation and produce a structured report.
-2. Present all suggestions **without editing any files**.
-3. **Ask for explicit permission** before applying any changes to agent instruction files.
+2. Save the report to `agent-output/Mentor-Report-<YYYY-MM-DD>.md`.
+3. **Not edit any agent instruction files.**
 
 ### Apply mode
 
-Use this when you want Mentor to analyze **and** directly edit the agent instruction files.
+Use this only when you explicitly want Mentor to edit the local agent instruction files in the current repo. This is appropriate when running Mentor in the agent definition repo itself.
 
 > **Example prompts:**
 > - "Analyze this chat and apply all recommended changes to the agent instructions"
@@ -55,7 +55,7 @@ The key signal is an explicit request to **apply**, **edit**, **update**, or **m
 2. Apply all recommended changes directly to the agent instruction files.
 3. Summarize what was changed in each file.
 
-**Rule of thumb:** if the user's prompt does not explicitly ask for edits to be made, operate in **Report mode** and ask before touching any files.
+**Rule of thumb:** if the user's prompt does not explicitly ask for local edits, operate in **Report mode**. Never ask "shall I apply these?" — just produce the report and let the user invoke Apply mode explicitly if they want it.
 
 ---
 
@@ -171,7 +171,7 @@ Present the final report with:
 
 **Then, depending on the operating mode:**
 
-- **Report mode (default):** Ask the user: *"Would you like me to apply these changes to the agent instruction files?"* Do not edit any files until the user confirms.
+- **Report mode (default):** Save the report to `agent-output/Mentor-Report-<YYYY-MM-DD>.md`. Do not edit any agent files and do not ask whether to apply changes — the report is the deliverable.
 - **Apply mode:** Before editing any agent file, verify every suggestion passes the repo-agnostic check above. Rephrase any suggestion that references specifics of the originating repo (paths, filenames, framework choices, naming conventions) into a general, transferable instruction. Then edit each agent's instruction file, inserting the verified text at the recommended locations. After editing, list each file modified and summarize the changes made.
 
 #### Incoming hints files
