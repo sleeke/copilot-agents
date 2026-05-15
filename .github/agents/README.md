@@ -41,6 +41,7 @@ For guidance on adapting these agents to a new repository, see
 | **Scribe** | `scribe.agent.md` | Generates and maintains per-folder README documentation. |
 | **Deployer** | `deployer.agent.md` | Runs the deployment pipeline and reports the outcome. |
 | **Mentor** | `mentor.agent.md` | Analyses sessions to extract lessons and improve agent instructions. |
+| **Init** | `init.agent.md` | Idempotent project scaffolding: ensures all pipeline artefacts and config files exist. Invoked manually or as an orchestrator pre-flight step. |
 
 ---
 
@@ -48,12 +49,14 @@ For guidance on adapting these agents to a new repository, see
 
 ```mermaid
 flowchart TD
-    A["Requirement Input<br/>(prompt text · file · plan/ROADMAP.md)"] --> B["<b>Orchestrator</b><br/>Routes to workflow agent"]
+    A["Requirement Input<br/>(prompt text · file · plan/ROADMAP.md)"] --> PRE["<b>Orchestrator pre-flight</b><br/>Invoke init if .github/copilot-instructions.md missing"]
+    PRE --> B["<b>Orchestrator</b><br/>Routes to workflow agent"]
 
     B -->|"Feature work"| C["<b>Feature Delivery</b><br/>End-to-end pipeline"]
     B -->|"Bug / fix / broken"| BF["<b>Bug Fix</b><br/>Diagnose &amp; repair"]
     B -->|"Analysis/refactor"| D["<b>Refactor</b><br/>Audit &amp; remediate"]
     B -->|"Release"| E["<b>Release Manager</b><br/>Version bump &amp; deploy"]
+    B -->|"init / scaffold"| I["<b>Init</b><br/>Scaffold missing artefacts"]
 
     C --> F["Tier 3 Specialists<br/>(spec-expander → implementer →<br/>code-reviewer → quality-gate →<br/>scribe → deployer → mentor)"]
 
@@ -65,13 +68,16 @@ flowchart TD
     F --> H["Completion summary<br/>to user"]
     FB --> H
     G --> H
+    I --> H
 
     style A fill:#f0f4ff,stroke:#4a6fa5
+    style PRE fill:#f5f5f5,stroke:#9e9e9e,stroke-dasharray:4 2
     style B fill:#fff3e0,stroke:#e09840
     style C fill:#e8f5e9,stroke:#4caf50
     style BF fill:#fce4ec,stroke:#e91e63
     style D fill:#e3f2fd,stroke:#2196f3
     style E fill:#f3e5f5,stroke:#9c27b0
+    style I fill:#e0f7fa,stroke:#00acc1
     style F fill:#fff8e1,stroke:#ff9800
     style FB fill:#fff8e1,stroke:#ff9800
     style G fill:#fff8e1,stroke:#ff9800
@@ -145,6 +151,10 @@ Auto-applied conventions scoped to file globs, in `.github/instructions/`.
 ## Invocation examples
 
 ```
+# Scaffold a new project (or fill gaps in an existing one)
+@orchestrator Initialise the project
+@init
+
 # Full feature pipeline from a prompt requirement
 @orchestrator Add rate limiting to the API
 

@@ -38,6 +38,7 @@ in the Tier 2 workflow agents you delegate to.
               │  scribe                    │
               │  deployer                  │
               │  mentor                    │
+              │  init                      │  ← also invoked as pre-flight
               └────────────────────────────┘
 ```
 
@@ -58,6 +59,7 @@ Parse the user's prompt and select the workflow agent:
 
 | Trigger (present in prompt) | Route to |
 |---|---|
+| "init", "initialise", "initialize", "scaffold", "set up the project", "bootstrap" | **init** |
 | "fix", "bug", "broken", "regression", "doesn't work", "not working", "issue #", "error:", "crash", "failing test" | **bug-fix** |
 | "analyse", "analyze", "review", "audit", "health check", "refactor", `scope:`, `focus:` | **refactor** |
 | "release", "deploy to production", "deploy to prod", "changelog", "version bump" | **release-manager** |
@@ -87,6 +89,15 @@ When the user includes scope parameters, pass them through verbatim to the workf
 
 ## Execution
 
+### Step 0 — Pre-flight scaffolding check
+
+Before routing, check whether `.github/copilot-instructions.md` exists.
+- If it **does not exist**: invoke the **init** agent first. Wait for it to complete
+  before proceeding to routing. This ensures all agents have the context they need.
+- If it **exists**: skip this step and proceed immediately to routing.
+
+### Steps 1–5
+
 1. Read the user's prompt.
 2. Match against the routing table above (apply priority order top-to-bottom).
 3. Invoke the selected workflow agent with:
@@ -105,6 +116,8 @@ You do not retry, fix code, or make architectural decisions. You route and relay
 
 | User says | Routes to | Parameters passed |
 |---|---|---|
+| "Initialise this project" | init | — |
+| "Set up the project scaffolding" | init | — |
 | "Add rate limiting to the contact API" | feature-delivery | requirement text |
 | "Implement specs/improve-the-main-page.md" | feature-delivery | spec file path |
 | "Process prepared requirements" | feature-delivery | plan/ROADMAP.md reference |
