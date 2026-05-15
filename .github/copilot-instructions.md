@@ -14,14 +14,20 @@ Three-tier agent hierarchy:
 | Tier | Role | Agents |
 |------|------|--------|
 | **1** | Intent routing | Orchestrator |
-| **2** | Workflow coordination | Feature Delivery, Refactor, Release Manager |
+| **2** | Workflow coordination | Feature Delivery, Bug Fix, Refactor, Release Manager |
 | **3** | Specialist execution | Spec Expander, Implementer, Code Reviewer, Architect, Quality Gate, Designer, Scribe, Deployer, Mentor |
 
 Data flows through shared artefacts:
 - `plan/ROADMAP.md` — feature backlog
 - `plan/BUG_TRACKER.md` — bug tracking
 - `specs/` — generated specification files (created by spec-expander)
+- `specs/archive/` — completed specifications (moved here after feature delivery)
+- `CHANGELOG.md` — release history (maintained by release-manager)
 - `agent-output/` — reports and reviews (created at runtime)
+
+On-demand knowledge modules (skills) — load at runtime, never included by default:
+- `.github/skills/git-ops/SKILL.md` — branching strategy, commit conventions, PRs, tags
+- `.github/skills/security-audit/SKILL.md` — OWASP Top 10 checklist, secret detection, input validation
 
 ## Conventions for agent files
 
@@ -36,12 +42,25 @@ Data flows through shared artefacts:
   (e.g. "invoke the implementer agent"), not by file path.
 - **Tier discipline:** Tier 1 routes, Tier 2 orchestrates workflows, Tier 3 executes
   a single specialist task. Never skip tiers in delegation.
+- **Size limit:** No agent instruction file may exceed **300 lines**. If an agent
+  exceeds this, extract reference material (tables, catalogues, templates) into a
+  skill in `.github/skills/` and have the agent load it on demand.
 
 ## Key files
 
 - [ADAPTING.md](../ADAPTING.md) — instructions for adapting agents to a target repository
 - [.github/agents/README.md](agents/README.md) — agent system overview, data flow, invocation examples
 - [plan/ROADMAP.md](../plan/ROADMAP.md) — feature backlog for this repo's own development
+
+**Skills** (`.github/skills/<name>/SKILL.md`) — on-demand knowledge modules loaded at
+runtime by agents that need them. Frontmatter must include a `description` field with
+a "Use when:" trigger phrase.
+
+**Prompts** (`.github/prompts/<name>.prompt.md`) — slash-command parameterised tasks
+with `mode: agent` frontmatter and `${input:...}` placeholders.
+
+**Instructions** (`.github/instructions/<name>.instructions.md`) — auto-applied
+conventions scoped to file globs via the `applyTo` frontmatter field.
 
 ## When editing agent instructions
 

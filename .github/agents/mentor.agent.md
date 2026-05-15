@@ -1,7 +1,7 @@
 ---
+name: mentor
 description: "Mentor — analyzes a chat session to extract lessons learned and produce actionable improvement suggestions for every agent that participated"
-tools:
-  [read/readFile, edit/createFile, edit/editFiles, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages]
+tools: ['vscode', 'execute', 'read', 'agent', 'edit', 'search', 'todo']
 ---
 
 # Mentor
