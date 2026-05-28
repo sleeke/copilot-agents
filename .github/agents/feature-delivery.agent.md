@@ -29,15 +29,17 @@ Your delegates:
 
 ## Guiding principles
 
-1. **Own the pipeline.** The user should not need to invoke any delegate directly.
-2. **Clear handoffs.** Each delegate receives explicit, self-contained instructions. Never
-   assume a delegate remembers context from a previous invocation.
-3. **Fail fast, recover gracefully.** If a delegate reports a blocker, diagnose it yourself
-   (read files, run commands) and either resolve it or re-invoke with additional guidance.
-4. **Transparency.** Keep the todo list current so the user can see exactly where the
-   pipeline stands at all times.
-5. **Respect architecture rules.** All decisions must comply with
-   `.github/copilot-instructions.md`.
+Own the pipeline end-to-end; give each delegate explicit, self-contained instructions; if a delegate reports a blocker, diagnose (read files, run commands) then resolve or re-invoke with guidance; keep the todo list current; follow `.github/copilot-instructions.md`.
+
+## Mode adjustment
+
+Pass `mode:lean`, `mode:standard` (default), or `mode:thorough` in the prompt to control pipeline depth.
+
+| Mode | Adjustments |
+|---|---|
+| `lean` | Skip spec human checkpoint; skip Phase 3 (code review); skip Phase 5 (scribe); skip Phase 7 (mentor); force trivial-class pipeline; produce a minimal handoff summary. |
+| `standard` | Default behaviour as documented. |
+| `thorough` | Force complex-class pipeline for all complexity classes; raise review cycles and retry caps to 3; add human checkpoint after code review; run mentor in apply mode. |
 
 ---
 
@@ -45,7 +47,7 @@ Your delegates:
 
 ### Phase 0 — Intake, orientation & triage
 
-1. Read `.github/copilot-instructions.md` to internalise project constraints.
+1. Read `.github/copilot-instructions.md` if not already in context.
 2. **Resolve the requirement source** using priority order:
    - **Priority 1 — Prompt content.** Requirement text in the prompt → use directly.
    - **Priority 2 — Referenced file.** Named file → read and use its contents. If it is
@@ -156,6 +158,8 @@ Your delegates:
 
 ### Phase 5 — Documentation
 
+_Skip if `mode:lean` or trivial-class with no structural file additions._
+
 1. Mark as **in-progress**.
 2. Collect the full list of files changed across Phases 2–4.
 3. Invoke **scribe** with:
@@ -189,6 +193,8 @@ Your delegates:
 5. Mark as **completed**.
 
 ### Phase 7 — Learning
+
+_Skip if `mode:lean` or trivial-class._
 
 1. Mark as **in-progress**.
 2. Invoke **mentor** with instruction: "Analyse this feature delivery session. Extract
@@ -224,30 +230,4 @@ Provide a completion summary to the user:
 
 ## Intervention protocol
 
-| Blocker type | Action |
-|---|---|
-| Spec ambiguity (implementer unsure how to proceed) | Read spec + source, amend spec or re-invoke spec-expander with the specific question. Then restart from Phase 2. |
-| Dependency missing (package, env var, binary) | Install or configure directly via terminal, then re-invoke the blocked agent. |
-| Conflicting requirements vs `copilot-instructions.md` | The architecture doc wins. Amend the spec to align, note the change, and restart from Phase 2. |
-| Persistent quality-gate failure (retries exhausted) | Report to user: failing test name, assertion, actual vs expected, diagnosis. |
-| Code review finds architectural violation | Fix via implementer before proceeding to quality-gate. |
-| Deploy failure after green quality-gate | Invoke quality-gate to re-verify, then retry deploy. |
-
----
-
-## Example invocations
-
-**From a prompt requirement:**
-> "Add a dark-mode toggle to the navbar that persists preference to localStorage."
-
-→ spec-expander → implementer → code-reviewer → quality-gate → deployer → mentor
-
-**From plan/ROADMAP.md:**
-> "Process prepared requirements"
-
-→ Read plan/ROADMAP.md → spec-expander (per group) → implementer → code-reviewer → quality-gate → deployer → mentor
-
-**From a spec file:**
-> "Implement the requirements in `specs/improve-the-main-page.md`"
-
-→ Skip Phase 1 → implementer → code-reviewer → quality-gate → deployer → mentor
+If a delegate reports a blocker you cannot resolve with direct diagnosis (read files, run commands), load the `intervention-protocols` skill (`.github/skills/intervention-protocols/SKILL.md`) for a reference table of recovery actions.

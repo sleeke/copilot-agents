@@ -126,6 +126,8 @@ runtime when needed — they are never included by default.
 |-------|------|-----------|
 | **git-ops** | `.github/skills/git-ops/SKILL.md` | release-manager, bug-fix, feature-delivery (when branching) |
 | **security-audit** | `.github/skills/security-audit/SKILL.md` | code-reviewer, architect |
+| **intervention-protocols** | `.github/skills/intervention-protocols/SKILL.md` | All Tier 2 workflow agents (on-demand, when a delegate reports a blocker) |
+| **remediation-patterns** | `.github/skills/remediation-patterns/SKILL.md` | refactor (during remediation phase) |
 
 ### Prompts
 
@@ -158,11 +160,20 @@ Auto-applied conventions scoped to file globs, in `.github/instructions/`.
 # Full feature pipeline from a prompt requirement
 @orchestrator Add rate limiting to the API
 
+# Full feature pipeline — lean (skip review, scribe, mentor)
+@orchestrator Add rate limiting to the API mode:lean
+
+# Full feature pipeline — thorough (architect pre-check, double review, mentor applies)
+@orchestrator Add dark-mode toggle mode:thorough
+
 # Full pipeline from plan/ROADMAP.md
 @orchestrator Process prepared requirements
 
 # Bug fix from a description
 @orchestrator Fix the login page crashing on empty email input
+
+# Bug fix — lean (no mentor, no tracker update)
+@orchestrator Fix the login page crashing on empty email input mode:lean
 
 # Spec only (no implementation)
 @spec-expander Add a caching layer to the data access module
@@ -172,6 +183,9 @@ Auto-applied conventions scoped to file globs, in `.github/instructions/`.
 
 # Analyse the codebase architecture
 @orchestrator Analyse the codebase
+
+# Analysis report only (no remediation)
+@orchestrator Analyse the codebase report-only
 
 # Deploy to production
 @orchestrator Deploy to production
@@ -185,3 +199,60 @@ Auto-applied conventions scoped to file globs, in `.github/instructions/`.
 # Write tests via prompt
 /write-test src/checkout/cart.ts
 ```
+
+---
+
+## Mode parameter
+
+All workflow agents accept a `mode:` parameter to control pipeline depth and token use.
+Pass it anywhere in your prompt — the orchestrator relays it to the selected workflow agent.
+
+| Mode | Effect |
+|------|--------|
+| `mode:lean` | Fastest, fewest tokens. Skips mentor, scribe, second review cycles, and architect pre-checks. Minimal handoff output. Use for quick fixes and low-stakes changes. |
+| `mode:standard` | Default behaviour. Full pipeline as documented in each agent. |
+| `mode:thorough` | Maximum quality. Forces architect pre-check, double review passes, higher retry caps, and mentor in apply mode. Use for high-risk or complex changes. |
+
+**Examples:**
+
+```
+@orchestrator Fix the broken login form mode:lean
+@orchestrator Add dark-mode toggle mode:thorough
+@orchestrator Process prepared requirements mode:standard
+```
+
+---
+
+## Orchestrator routing reference
+
+The orchestrator maps trigger words to workflow agents. Routing priority: bug-fix > refactor > release-manager > feature-delivery (default).
+
+| User says | Routes to | Parameters passed |
+|---|---|---|
+| "Initialise this project" | init | — |
+| "Set up the project scaffolding" | init | — |
+| "Add rate limiting to the contact API" | feature-delivery | requirement text |
+| "Implement specs/improve-the-main-page.md" | feature-delivery | spec file path |
+| "Process prepared requirements" | feature-delivery | plan/ROADMAP.md reference |
+| "Fix the broken login form" | bug-fix | defect description |
+| "The payment flow is crashing" | bug-fix | defect description |
+| "Fix issue #42" | bug-fix | issue reference |
+| "Analyse the codebase" | refactor | scope:project (default) |
+| "Review scope:file target:components/NavBar.tsx" | refactor | scope:file, target:… |
+| "Audit focus:RSC boundaries report-only" | refactor | focus:…, report-only |
+| "Refactor the content layer" | refactor | free-text target |
+| "Deploy to production" | release-manager | — |
+| "Release version 2.1.0" | release-manager | — |
+| "Review ContactForm and add rate limiting" | refactor → feature-delivery | scoped review, then requirement |
+| "Fix the null pointer crash and add retry logic" | bug-fix → feature-delivery | defect first, then requirement |
+
+---
+
+## Design principles
+
+| Principle | Description |
+|-----------|-------------|
+| **Single Responsibility** | Each agent does exactly one thing. Orchestrator routes. Workflow agents sequence. Specialists execute. |
+| **Open–Closed** | New workflows add a new Tier 2 agent without modifying existing ones. |
+| **Interface Segregation** | Each delegate receives only the context it needs. |
+| **Dependency Inversion** | Workflow agents depend on abstract specialist roles, not concrete file paths or internals. |

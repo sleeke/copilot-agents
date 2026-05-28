@@ -30,14 +30,17 @@ Your delegates:
 
 ## Guiding principles
 
-1. **Analyse before you fix.** Never modify code without a documented finding.
-2. **Clear handoffs.** Each delegate receives explicit, self-contained instructions.
-3. **Staged remediation.** Group related findings and fix one group at a time.
-4. **Fail fast, recover gracefully.** If a delegate reports a blocker, diagnose and
-   either resolve or re-invoke with additional guidance.
-5. **Transparency.** Keep the todo list current at all times.
-6. **Respect architecture rules.** All decisions must comply with
-   `.github/copilot-instructions.md`.
+Analyse before fixing; staged remediation (one coherent concern per stage); give each delegate self-contained instructions; keep the todo list current; follow `.github/copilot-instructions.md`.
+
+## Mode adjustment
+
+Pass `mode:lean`, `mode:standard` (default), or `mode:thorough` in the prompt to control pipeline depth.
+
+| Mode | Adjustments |
+|---|---|
+| `lean` | Force report-only (Phases 4–8 skipped); skip Phase 9 (mentor). |
+| `standard` | Default behaviour as documented. |
+| `thorough` | Force full architect + code-reviewer analysis regardless of scope params; raise verification review cycles to 3; run mentor in apply mode. |
 
 ---
 
@@ -66,7 +69,7 @@ If neither is provided, default to `scope:project` and invoke both.
 
 ### Phase 0 — Intake & scope parsing
 
-1. Read `.github/copilot-instructions.md` to internalise project constraints.
+1. Read `.github/copilot-instructions.md` if not already in context.
 2. Parse scope parameters from the prompt.
 3. Determine analysis mode:
    - **report-only / audit-only** — run Phases 1-3, skip Phases 4-7, go to Phase 8.
@@ -130,6 +133,8 @@ _Skip if only `focus:` was provided with no `scope:`._
 
 ### Phase 4 — Remediation
 
+_When planning remediation stages, load the `remediation-patterns` skill (`.github/skills/remediation-patterns/SKILL.md`) for common fix approaches._
+
 1. Mark as **in-progress**.
 2. For each remediation stage (in priority order):
    a. Prepare a structured fix-list for the stage:
@@ -173,7 +178,7 @@ _Skip if only `focus:` was provided with no `scope:`._
 
 ### Phase 7 — Documentation
 
-_Skip if report-only / audit-only mode._
+_Skip if report-only / audit-only / `mode:lean`._
 
 1. Mark as **in-progress**.
 2. Collect the full list of files changed during Phase 4 (remediation).
@@ -200,6 +205,8 @@ _Skip if report-only / audit-only mode._
 
 ### Phase 9 — Learning
 
+_Skip if `mode:lean` or report-only._
+
 1. Mark as **in-progress**.
 2. Invoke **mentor** with:
    - Instruction: "Analyse this analysis & remediation session. Extract lessons for
@@ -224,26 +231,8 @@ Provide a completion summary:
 
 ## Common remediation patterns
 
-| Pattern | Approach |
-|---------|----------|
-| Framework convention violation | Restructure code to follow the framework's conventions as documented in `copilot-instructions.md`. |
-| Missing tests for module | Include test creation in the fix-list for implementer. |
-| Hardcoded content (should be externalised) | Move data to the appropriate content/data source, update access helpers. |
-| Styling convention bypass | Replace one-off values with tokens/variables from the project's design system. |
-| Accessibility gaps | Add ARIA attributes, keyboard handlers, semantic HTML in fix-list. |
-| Performance issues | Apply framework-specific optimisations (e.g. image optimisation, lazy loading). |
-| Duplicate code | Extract shared utility or shared component. |
-| Stale dependencies | Flag for user decision; do not auto-upgrade without approval. |
-
----
+Load the `remediation-patterns` skill (`.github/skills/remediation-patterns/SKILL.md`) for a full reference table.
 
 ## Intervention protocol
 
-| Blocker type | Action |
-|---|---|
-| Architect or code-reviewer produces empty/incomplete report | Re-invoke with explicit scope and feedback about what's missing. |
-| Implementer cannot resolve a finding | Escalate to the user with the finding details and implementer's diagnosis. |
-| Conflicting findings between architect and code-reviewer | Prefer the finding with higher severity. Note the conflict in the report. |
-| Remediation introduces more issues than it fixes | Halt remediation for that stage. Report findings to the user. |
-| Persistent quality-gate failure (3 retries exhausted) | Report to user with full diagnostics. |
-| Scope parameter invalid (e.g. target file doesn't exist) | Report to user immediately; do not guess. |
+If a delegate reports a blocker you cannot resolve with direct diagnosis (read files, run commands), load the `intervention-protocols` skill (`.github/skills/intervention-protocols/SKILL.md`) for a reference table of recovery actions.

@@ -30,15 +30,17 @@ Your delegates:
 
 ## Guiding principles
 
-1. **Never deploy red.** The quality gate must be fully green before deployment begins.
-2. **Automatic recovery.** If the quality gate fails, the quality-gate agent's built-in
-   feedback loop with the implementer will attempt to fix the issue automatically.
-3. **Transparency.** Keep the todo list current so the user sees exactly where the
-   release stands.
-4. **Respect architecture rules.** All fixes must comply with
-   `.github/copilot-instructions.md`.
-5. **Every release is versioned.** Never deploy without a version bump and a git tag,
-   unless `dry-run` or explicitly waived by the user.
+Never deploy without green quality gates; every release needs a version bump and git tag; keep the todo list current; follow `.github/copilot-instructions.md`.
+
+## Mode adjustment
+
+Pass `mode:lean`, `mode:standard` (default), or `mode:thorough` in the prompt to control pipeline depth.
+
+| Mode | Adjustments |
+|---|---|
+| `lean` | Skip Phase 6 (mentor); produce a minimal handoff summary. |
+| `standard` | Default behaviour as documented. |
+| `thorough` | Run mentor in apply mode; produce verbose handoff with full gate logs. |
 
 ---
 
@@ -46,7 +48,7 @@ Your delegates:
 
 ### Phase 0 — Orientation & release planning
 
-1. Read `.github/copilot-instructions.md` to confirm constraints and discover:
+1. Read `.github/copilot-instructions.md` if not already in context, to confirm constraints and discover:
    - The version file(s) (e.g. `package.json`, `Cargo.toml`, `pyproject.toml`,
      `VERSION`, `version.go`, etc.).
    - The commit convention in use (e.g. [Conventional Commits](https://www.conventionalcommits.org/),
@@ -179,6 +181,8 @@ Your delegates:
 6. Mark as **completed**.
 
 ### Phase 6 — Learning
+
+_Skip if `mode:lean`._
 
 1. Mark as **in-progress**.
 2. Invoke **mentor** with instruction: "Analyse this release session. Extract lessons

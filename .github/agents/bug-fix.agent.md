@@ -30,16 +30,17 @@ Your delegates:
 
 ## Guiding principles
 
-1. **Reproduce before fixing.** Never attempt a fix without first confirming you can
-   reproduce the defect (or having enough evidence of the root cause).
-2. **Minimal change.** The fix should be the smallest change that corrects the behaviour.
-   Do not refactor unrelated code during a bug fix.
-3. **Regression guard.** Every fix must be accompanied by at least one failing test
-   that passes after the fix, unless the existing test suite already covers the case.
-4. **Transparent diagnosis.** Document the root cause before fixing. This makes the fix
-   reviewable and the decision auditable.
-5. **Respect architecture rules.** All fixes must comply with
-   `.github/copilot-instructions.md`.
+Reproduce before fixing; apply the minimal change only; every fix needs a regression test; document the root cause before implementing; follow `.github/copilot-instructions.md`.
+
+## Mode adjustment
+
+Pass `mode:lean`, `mode:standard` (default), or `mode:thorough` in the prompt to control pipeline depth.
+
+| Mode | Adjustments |
+|---|---|
+| `lean` | Skip Phase 5 (BUG_TRACKER update); skip Phase 6 (mentor); produce a minimal handoff summary. |
+| `standard` | Default behaviour as documented. |
+| `thorough` | Double quality-gate retry cap (6 retries); run mentor in apply mode. |
 
 ---
 
@@ -47,7 +48,7 @@ Your delegates:
 
 ### Phase 0 — Intake & orientation
 
-1. Read `.github/copilot-instructions.md` to internalise project constraints.
+1. Read `.github/copilot-instructions.md` if not already in context.
 2. **Resolve the defect description** using priority order:
    - **Priority 1 — Prompt content.** Bug description in the prompt → use directly.
    - **Priority 2 — Issue reference.** If an issue number (e.g. "#42") is given,
@@ -156,6 +157,8 @@ Your delegates:
 
 ### Phase 6 — Learning
 
+_Skip if `mode:lean`._
+
 1. Mark as **in-progress**.
 2. Invoke **mentor** with instruction: "Analyse this bug-fix session. Extract lessons
    for the implementer and quality-gate agents. Focus on: root-cause identification
@@ -180,13 +183,7 @@ Provide a fix summary to the user:
 
 ## Intervention protocol
 
-| Blocker type | Action |
-|---|---|
-| Cannot reproduce the bug from the description | Ask the user for reproduction steps using `vscode_askQuestions` before proceeding. |
-| Root cause spans multiple unrelated systems | Fix the primary failure point. Open a new bug entry for each secondary issue. |
-| Fix requires architectural change | Do not proceed autonomously. Present the finding to the user; route to feature-delivery or refactor if the user confirms scope. |
-| Implementer cannot isolate the fix without side-effects | Present the trade-off to the user using `vscode_askQuestions` before choosing an approach. |
-| Persistent quality-gate failure unrelated to the fix | Report the pre-existing failure to the user separately. Do not block the bug-fix summary. |
+If a delegate reports a blocker you cannot resolve with direct diagnosis (read files, run commands), load the `intervention-protocols` skill (`.github/skills/intervention-protocols/SKILL.md`) for a reference table of recovery actions.
 
 ---
 
